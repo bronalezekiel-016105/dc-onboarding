@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Digital Chances — Start a New Engagement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1118; --panel:#161b26; --panel-2:#1c2330; --line:#2a3342; --line-soft:#212a38;
+  --ink:#eef2f8; --ink-dim:#9aa7bd; --ink-faint:#61708a; --field:#10151f;
+  --brand-cyan:#0f9fdb; --brand-navy:#1f2966; --brand-deep:#16204f;
+  --client:#1596d8; --client-soft:#123a5c;
+  --intern:#39c8a8; --intern-soft:#1d4a45;
+  --contractor:#f0a94b; --contractor-soft:#4d3820;
+  --accent:var(--client); --accent-soft:var(--client-soft);
+  --ok:#42d392; --err:#ff6b6b;
+  --radius:14px; --radius-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(21,150,216,.09), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgba(31,41,102,.14), transparent 55%),
+    var(--bg);
+  color:var(--ink); font-family:'Inter',system-ui,sans-serif; line-height:1.5; min-height:100vh;
+  padding:clamp(16px,4vw,48px);
+}
+.wrap{max-width:860px;margin:0 auto}
+
+/* masthead */
+.masthead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.brandmark{display:flex;align-items:center;gap:14px}
+.brandmark img{width:52px;height:52px;border-radius:12px;flex-shrink:0;background:#fff;padding:6px;object-fit:contain;
+  box-shadow:0 6px 20px -8px rgba(21,150,216,.5), 0 0 0 1px var(--line)}
+.brand-copy{display:flex;flex-direction:column;gap:4px}
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--brand-cyan),#4fb8e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-copy h1{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(22px,3.4vw,30px);letter-spacing:-.01em;line-height:1.1;color:var(--ink)}
+.brand-copy p{color:var(--ink-dim);font-size:13.5px;max-width:46ch}
+.trust-chip{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);border:1px solid var(--line-soft);
+  border-radius:100px;padding:6px 12px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.trust-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);transition:background .4s ease}
+
+/* step indicator */
+.steps{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.step{display:flex;align-items:center;gap:7px;color:var(--ink-faint)}
+.step .n{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:11px}
+.step.active{color:var(--accent)} .step.active .n{border-color:var(--accent);color:var(--accent)}
+.step.done{color:var(--ok)} .step.done .n{border-color:var(--ok);color:var(--ok)}
+.step-sep{flex:1;height:1px;background:var(--line-soft);min-width:12px;max-width:40px}
+
+/* role selector */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.role{position:relative;cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);
+  padding:16px;text-align:left;color:var(--ink);transition:border-color .2s,background .2s,transform .12s;display:flex;flex-direction:column;gap:9px}
+.role:hover{transform:translateY(-2px)}
+.role:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.role .glyph{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;border:1px solid var(--r-line);background:var(--r-soft);color:var(--r)}
+.role .glyph svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7}
+.role .rname{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px}
+.role .rdesc{font-size:11.5px;color:var(--ink-faint);line-height:1.35}
+.role[data-role="client"]{--r:var(--client);--r-soft:var(--client-soft);--r-line:#3a478a}
+.role[data-role="intern"]{--r:var(--intern);--r-soft:var(--intern-soft);--r-line:#2c6b60}
+.role[data-role="contractor"]{--r:var(--contractor);--r-soft:var(--contractor-soft);--r-line:#77571f}
+.role[aria-pressed="true"]{background:var(--panel-2);border-color:var(--r);box-shadow:inset 0 0 0 1px var(--r),0 8px 24px -14px var(--r)}
+.role[aria-pressed="true"]::after{content:"";position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:var(--r);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--r) 25%,transparent)}
+
+/* panel */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.panel-head{padding:16px 22px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:12px;
+  background:linear-gradient(to right,var(--accent-soft) -40%,transparent 40%);transition:background .4s ease}
+.panel-head .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);transition:color .4s}
+.panel-head h2{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:16px}
+form{padding:22px}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  margin:6px 0 12px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.section-label:first-child{border-top:none;padding-top:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1 / -1}
+label{font-size:12.5px;font-weight:500;color:var(--ink-dim);display:flex;gap:6px;align-items:baseline}
+label .req{color:var(--accent);font-size:11px;transition:color .4s}
+label .hint{color:var(--ink-faint);font-weight:400;font-size:11px}
+input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:11px 13px;color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;transition:border-color .18s,box-shadow .18s}
+textarea{resize:vertical;min-height:80px;font-family:inherit}
+input::placeholder,textarea::placeholder{color:var(--ink-faint)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2361708a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;cursor:pointer}
+.role-fields{display:none}
+.role-fields.active{display:block}
+
+/* privacy + consent */
+.governance{margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel-2)}
+.governance h3{font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-dim);margin-bottom:8px;
+  display:flex;align-items:center;gap:7px}
+.governance h3 svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.7}
+.governance p{font-size:11.5px;color:var(--ink-faint);line-height:1.55;margin-bottom:10px}
+.consent{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:8px;border-radius:8px;transition:background .15s}
+.consent:hover{background:rgba(255,255,255,.02)}
+.consent input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--accent);cursor:pointer}
+.consent span{font-size:12px;color:var(--ink-dim);line-height:1.45}
+
+/* review screen */
+.review{display:none;padding:22px}
+.review.active{display:block}
+.review h3{font-family:'Space Grotesk',sans-serif;font-size:15px;margin-bottom:4px}
+.review .sub{font-size:12px;color:var(--ink-faint);margin-bottom:16px}
+.review-rows{border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+.rev-row{display:flex;gap:14px;padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:13px}
+.rev-row:last-child{border-bottom:none}
+.rev-row .k{color:var(--ink-faint);min-width:150px;font-size:12px}
+.rev-row .v{color:var(--ink);word-break:break-word}
+
+/* actions */
+.actions{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;
+  border-top:1px solid var(--line-soft);background:var(--panel-2);flex-wrap:wrap}
+.readout{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);display:flex;align-items:center;gap:8px;min-height:18px}
+.readout .rdot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint)}
+.readout.ok{color:var(--ok)} .readout.ok .rdot{background:var(--ok)}
+.readout.err{color:var(--err)} .readout.err .rdot{background:var(--err)}
+.readout.busy{color:var(--accent)} .readout.busy .rdot{background:var(--accent);animation:pulse 1s ease infinite}
+@keyframes pulse{50%{opacity:.3}}
+.btn-row{display:flex;gap:10px}
+.btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;border-radius:var(--radius-sm);padding:12px 20px;cursor:pointer;
+  transition:filter .15s,transform .1s,background .4s;display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:transparent;color:var(--ink-dim)}
+.btn:hover{filter:brightness(1.1)}
+.btn.primary{color:#0c0f16;background:var(--accent);border:none}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn .spin{width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#0c0f16;border-radius:50%;animation:rot .7s linear infinite;display:none}
+.btn.loading .spin{display:block}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* confirmation */
+.confirm{display:none;text-align:center;padding:40px 22px}
+.confirm.active{display:block;animation:fadein .4s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.confirm .check{width:56px;height:56px;border-radius:50%;background:var(--intern-soft);border:1px solid var(--intern);
+  display:grid;place-items:center;margin:0 auto 18px}
+.confirm .check svg{width:28px;height:28px;stroke:var(--intern);fill:none;stroke-width:2}
+.confirm h3{font-family:'Space Grotesk',sans-serif;font-size:20px;margin-bottom:8px}
+.confirm p{color:var(--ink-dim);font-size:13.5px;margin-bottom:6px;max-width:44ch;margin-left:auto;margin-right:auto}
+.ref{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--accent);background:var(--field);border:1px solid var(--line);
+  border-radius:8px;padding:10px 16px;display:inline-block;margin:12px 0;letter-spacing:.05em}
+.next-steps{text-align:left;max-width:420px;margin:18px auto 0;font-size:12.5px;color:var(--ink-dim)}
+.next-steps li{margin-bottom:6px;padding-left:4px}
+
+/* intern downloads */
+.downloads{margin-top:18px;border:1px solid var(--intern);border-radius:var(--radius);
+  background:linear-gradient(to right,var(--intern-soft) -30%,var(--panel) 45%);padding:18px 20px;display:none}
+.downloads.show{display:block;animation:fadein .35s ease}
+.downloads h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--intern);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.downloads h3 svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
+.downloads p{font-size:12.5px;color:var(--ink-dim);margin-bottom:14px}
+.dl-row{display:flex;gap:10px;flex-wrap:wrap}
+.dl-btn{display:flex;align-items:center;gap:9px;text-decoration:none;background:var(--field);border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:11px 15px;color:var(--ink);font-size:13.5px;font-weight:500;transition:border-color .15s,transform .1s;cursor:pointer}
+.dl-btn:hover{border-color:var(--intern);transform:translateY(-1px)}
+.dl-btn svg{width:16px;height:16px;stroke:var(--intern);fill:none;stroke-width:1.7}
+.dl-btn .meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint)}
+
+.foot-note{margin-top:18px;font-size:11px;color:var(--ink-faint);text-align:center;line-height:1.7}
+.foot-note a{color:var(--ink-dim)}
+
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr} .roles{grid-template-columns:1fr}
+  .role{flex-direction:row;align-items:center} .role .rdesc{display:none}
+  .actions{flex-direction:column;align-items:stretch} .btn-row{width:100%} .btn{flex:1;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brandmark">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2NjIpLCBxdWFsaXR5ID0gODIK/9sAQwAGBAQFBAQGBQUFBgYGBwkOCQkICAkSDQ0KDhUSFhYVEhQUFxohHBcYHxkUFB0nHR8iIyUlJRYcKSwoJCshJCUk/9sAQwEGBgYJCAkRCQkRJBgUGCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQk/8AAEQgCAAIAAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A+pKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKTFLQAUUUUAFFIKWgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACikNFAC0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFJnmgBaKKKACiiigAooooAKKKKACikpaACkpaKACiiigAoopBQAtFFFABRRRQAGiiigAooooAKKTNLQAUUUUAFFFFIAooopgFGaKTFAC0UUUAFFFFABRRRQAUUGkoAWikzS0AFFFFABRRSGgBaKSloAKKKKACiiilcAooopgFFFFABRRRQAUUUUAFFFGaACijNFABRRQaACikFLQAUUUUAJS0UmaAFooooAKKKKACiiigAooooAKKKKACiijNABRRRQAhFLRRQAUUUlAC0UCigAFFFFABRRRQAUUUUAFFFFABRRRQAmaKWigBKWiigAooooAKSlooAQUtFFABRRRQAUUUUAIaWiigAozRSUAApaQCloAKKKKAEoopaAEoFLSYoAWiiigAxRRRQAUUUUAFJS0UAFFFFABRSUtABRRRQAUUlLQAUUUUAFGKKKACiiigAoopDQAZooooAM0tJQKAFooooAKKKKACjNFIRQAtGaSigBaKSjFAC0UmaWgAopKWgAooooAKKKKACig0CgAooooAKKQ0UALRSClxQAUZpKBQAtFFFABRmikNAC9aTFFLQAUGikoAKWkFLQAUUUUAFFFJQAtFFFABR1pKKAFooxRQAUUUUAFFFFABSUGjFAC0UUUAFFFFABRRSUALRRRSAMUUlFMBaSlooAKKKSgBaKKKAENAoooAXFFFFACUUppMUAFFLRQAUUUUAFFFFABRRSZoAWikJooAKKWkoAWiiigAooooAKKKQ0ALRSUUAFGaKKAFpDRRQAUvSkpaACikpaACiiigAoozRQAlLRRQAGjNFBoAKKSloAKMUlLQAUUUUAFFFBoAKKKxfFviqw8H6PJqN8xOPliiX70r9lH+eKqEHOSjFasipUjTi5zdkjUu7y2sLd7m7nighQZaSRgqj8TXB6t8b/AArpztHbNc6g47wR4T82I/TNeJ+LvG+r+Mr0z385WBTmK2Q/u4h9O59zzWCDX0mGyKNr1nr2R8hjOJJuTjh1Zd2e5f8ADQenZ40O7x7yr/hTv+GgtP8A+gJd/wDf1a8NBp4Ndv8AY2F/l/E8x8QY7+b8Ee4f8NAaf/0BLr/v6v8AhS/8L/0//oCXX/f1f8K8QBp4NP8AsbC/y/iyHxDjv5vwR7X/AML+sf8AoB3X/f5f8KUfH2xP/MEuv+/y/wCFeK5pwNP+xsL/AC/iyXxFjv5vwR7V/wAL6sf+gLc/9/V/wpR8ebH/AKAtz/39X/CvFgaeDR/YuF/l/FkviTH/AM34I9n/AOF8WP8A0Bbn/v6v+FKPjtY/9Aa5/wC/q/4V4yDTwaayXCfy/iyHxJj/AOf8Eeyf8L1sT/zBrn/v6v8AhSj45WJPOjXP/f1a8cBpwNP+xcJ/L+LJfE2Yfzr7ke0w/G7SGOJdNvYx6gq39a0rX4veGLggPLdQZ/56Qn+ma8FBp4NZyyLDPa6+ZpDivHR3s/kfSdj4x8P6lgW2rWjMeitIFb8jzWurBhlSCD3r5YBrR07X9U0og2OoXNuB/CkhC/l0rjq8O/8APuf3no0OMne1en9z/wA/8z6YorxfSPjDrNmVTUIYb6MdT9x/zHH6V3mh/Ezw/rRWM3Bs5z/yzuMKCfZuleRiMrxNHWUbruj6LB5/gsVpGdn2eh1lFNV1dQysGU8gg5Bpc1557S1A0UtFABSUtFACUUtFABSUtJ3oAKWkxS0AFFJSigApDS0UAJilxRSFgoJJAA6k0ALikrh/FHxk8JeGS8Rvv7Qul48izw5B92+6PzryvxD+0L4h1ItHo9tb6XCeAxHmy/mRgflXbQy+vW1irLzODEZlQo6Sd35H0TLLHAhklkWNF5LMcAfjXNan8TfB+kkrca7aO46pA3mt/wCO5r5b1XxFq+vSGTVNSu7wnnEshYD6DoKprxXqUsjX/LyX3Hj1uIJf8u4fefRV7+0B4YgJFra6jdkdCI1RT+Zz+lY1z+0XyRa+HeOzS3X9Av8AWvElqVa7oZPhlur/ADPMqZ5i3tK3yPWm/aE1hs7NHsF9Mu5pB+0BrmRnS9Px/wAD/wAa8qFSDmtv7Mw38hySzfGf8/GesxftA6kD+90W0Yf7MrD/ABrTtP2gbdzi60GaMesVwG/morxYU9aTynCv7P4sSz3Gx+3+CPoWw+NPha8wJmu7Qn/nrFkfmpNdNpvi7QNXIWx1a0mc9EEgDfkea+WVNSrXLUyKi/gk0dNLinEQf7yKf4H1vmjNfMuj+Mtf0QqLLVLlEHSNm3p/3yciu70T43XMZWPWbBJV7y2x2t/3yeD+Yrza+SV4aw949nDcT4Wo7VLxf4Hr+aKxNC8Z6H4iUCwvozKf+WL/ACuPwP8AStuvJnCUHaSsz6ClWhVjzU5JryDFLikzS1JoJS0UUAFJS0hoAWikzS0AFfMPxW8XyeKfFVwqSE2NkxggUHg4OGb8SPyxX0T4r1BtK8NapfIcPBayOp9CFOP1r4/3EnJOSa9/IqClKVV9D5jiTENRjRXXVkwNLmog1OBr6g+NaJAaeDUQNOBpkNEymnA1EGp26gholDU4Gog1PBxTM2iUGnA1EDTgaCGiUGnhqiBpwNUZtEoNODVEDTgaZLRKDTg1RA04GghomDU4NUINODUyGiYNTgRUIbNODUyLHQ6B401nw46izu2aEdYJfmQ/h2/CvVPDHxQ0nW9lveEafdngCQ/Ix9m/xxXhoOacDXnYvKqGI1as+6PYy7PsVgnaL5o9n+nY+owQRkHIPpTq8I8KfEbVPDrJBMzXtj0MTn5kH+ye306V7JoPiLTvEdoLrT5xIP40PDofQjtXyONy6rhX7yuu5+iZXneHx6tB2l2f6dzTooorgPZCiiikAUlLRQAUUUUwExS0UUAGaKyfEvinSPCOmvqOsXkdtCvCgnLyH+6q9SfpXzf8QfjlrXi1pbHSmk0vSjldqNiWYf7TDoPYfjmuvDYOpXfu7dzlxOLhQXvb9j2Pxz8a/DvhAyWtvINU1JcjyIGGxD/tv0H0GTXgvi34q+KPGTMl3fNbWZPFpbEpHj37t+JrjAc81ItfR4bLqVHW133PmsVj6tbS9l2JFqRaiWpQa9FHlyJVqVTUKmpF61RjJEympVNQqakU00YtEwNSLUSmpBVGMkSinrUSmpFNMwkiValWolNSA1RhJEq1ItRKakWmYyJo2ZGDKSrA5BBwRXb+G/iprWi7Ibtv7RthxtlPzqPZv8c1wympVrKthqdZctRXKw+Mr4WXPRk0z6L8OeM9H8TRD7HcBZwPmt5Pldfw7/hW7mvl2GaSCRZYnaORTlWU4IP1r0nwj8WJoClnr2ZYuAt0o+Zf94d/qOfrXzeNyOdP36Gq7dT7bK+K6dVqni1yvv0/4B6zS1Da3UF7AlxbSpNDIMq6HIIqavAaa0Z9gmmroKSloNAxBS0UUAc58RzjwHrx/wCnOT+VfJQNfWnxJ/5EHXv+vKT+VfJAavpsh+CfqfIcSL97D0JQaeDUQanA19AfMtEgNODVEDTgaZDRMDShqiDU4NmmQ0TA08NUINODUENEwNPDVCDTg1MzaJgacDUINPBppkNEoNOBqIGnA0yGiUNTgaiBpwagzaJgaUGowacGpktEgNOBqMGnA5pkNEoNOBqIGnA0yGiUGr+kazfaHeJeWE7Qyr6dGHoR3FZoNOBpThGacZK6CE5U5KcHZo988F+PrPxVEIJNtvqCj5oc8P7r6/TtXVZr5et7iW1mSeCRo5YyGV1OCp9RXtXgH4hReIY1sNQZYtRUcHoJh6j39q+QzTKHR/e0fh/I/Rch4jWJth8S7T6Pv/wTuKKSlrwT68KM0UUAFFFFABXCfEz4saV8PbXyflvNWlXMNorfdH95z2X9T29ay/i/8YrfwLbtpelmO41yVeB1W2U/xN7+i/ieOvy3e393ql7NfX1xJcXM7F5JZDlmNepgcvdX36nw/mefi8Z7P3Ybmn4m8Wav4x1N9R1i7aeVuFUcJGv91V7CswVGKeK+khFRVo7Hz9RuTuyRTTwajWng1ojlkiRTUgNdH4O+G/iPxrIDptkVtc4a7n+SJfx7/QZr2/wp+z94f0dUm1mR9XuRyVPyQg/7o5P4n8K5MRmFGjo3d9kb0MurV9Yqy7s+f9I0TVNdn8jS9Pub2TusMZbH1Pb8a9E0T4AeKNQCvfy2mmIezt5jj8F4/WvoiysbXTbdbaztobaFOFjiQKo/AVPXj1s6qy/hq34nrUcipLWq7/geS6Z+zro0AU6jq17dMOohVYlP57j+tdHafBrwVaAZ0ppyO8s7n9MgV2/NGK4J46vPebPQhl2GhtBHOxfDzwlCMJ4f0/8AGIH+dTHwP4YI50HTv+/C1u4orF1qn8z+83+rUv5F9xzU3w38IzghtAsh/uLtP6Vl3fwY8IXQPl2lxan1hnbj/vrNdzRVxxVaO0395nPA4efxQX3Hkmo/AO3IJ0zWZU9FuYw36rj+Vcjq3wl8VaSC6WaXsY/itW3H/vk4P6V9EUV20s4xMN3f1PMxHDuDq/CuV+R8lzQTWsrQ3EUkMi9UdSpH4GlU19SatoGl67D5OpWMFymON68r9D1H4V514h+CMLhptBuzG3X7PcHKn6N1H45r2cNnlKelRcr/AAPm8bwxiKd5UXzL7meSg1Ipq1q+haloFybbUrSS3k7bhw3uD0NU1r24TjNc0XdHylWnKnJxmrMnU5p68VEpqQGtEc0kdH4T8Z6j4VuB5LGa0Y5kt3Pyn3Hoa9u8P+IrDxJYi7sZdw6PGfvRn0Ir5xFamg67e+Hr9Lyyk2sOGQ/dcehFeRmOUwxC54aS/M+gyXiGpgpKnV96n+Xp/kfRtFYvhfxRZ+KLH7RbHZMmBLCTyh/qPetqvjalOVOThNWaP1ChXhWgqlN3TExQKWioNTm/iT/yIOv/APXlJ/KvkVTX118Sf+RB1/8A68pP5V8hg4r6bIvgn6nyfEK/ew9CUGnA1GDS5r3j5tokBpwNRA04GqIaJQacDUQNPBpmbRKGpwNRA04GnchomBpwaoQacDQQ0TBqeDUAanhqCGiYGnZqINTg1O5m0SA08HFRA04NTIaJgacDUIanA0yGiUNinA1EDTwaZDRKGpwNRA04HFMholBpwNRA04GmQ0TA5qSGeSCVJYpGjkQhldTgqR3FQA08GhpNWZOqd0e6fD3xynia1+x3jKupQrz285f7w9/UV2VfMOn39xpl5FeWkrRTRNuRh2NfQXg/xTb+K9JS6TalwmFniH8Df4HtXxmb5b9Xl7Wmvdf4H6Xw5nf1uHsKz99fiv8AM3aKSivEPqha83+MXxYg8AaZ9isGSXXLpf3KHkQL/wA9GH8h3PtW98R/Htl8PfDkup3O2S5f93a2+eZpMcfgOpP+Ir411vW7/wARatc6rqU7T3dy5d3P8h6AdAOwr0cBg/avnn8K/E5MVX5Fyx3I7u8udRupby8nknuJmLySSHLOx6kmmCowaeDX0q0Wh4kyQVIKiBrqPAngHWPH2qfY9Ni2wxkGe6cfu4R7+p9AOtE6kYLmk7Ix5HJ8sVqZOk6Tf63fRWGm2kt1dSnCRxrkn/Ae9fQPw+/Z8stNEd/4qKXt1wy2anMMf+8f4z7dPrXfeBvh7ovgGw+z6dDvuXA8+7kGZJT/AEHsOK6ivn8Xmk6nu0tF+J6+Fy2EPeqasZDBFbRJDBGkUSDaqIoCqPQAdKfRRXknqpCYpaKKACiiigBDRSmkoAXNFIKWgAoxRRSAKKKKYFXUtLstYtWtb+2iuYW6rIuce49D715L4v8AhFc6f5l7oRa5tx8zWzcyIP8AZ/vD9frXslFdeFxtXDO8Hp26Hm5hlWHxsbVVr36nyuVZGKsCrDgg9QaevSvcvG3w4svEqPd2YS11EDO8DCy+zD1968Vv9Ou9JvJLO9heGeM4ZW/mPUe9fY4HMKeKj7uj7H5pm2T1sBP39YvZkS1IpqJTTwa9E8Nmnoet3mg6hHfWchV14Zezr3B9q980HWbfX9Kg1C34WQfMvdG7j86+dAa9Z+Dk7vpd/C2diTKy+2Rz/KvAz7DQlS9st0fX8IY+pDE/VW/dkn8mj0OikFLXyJ+lHNfEo48A6/8A9eUv8q+QQea+vfiX/wAk/wDEH/XlJ/KvkAGvpci/hz9T5TiBfvY+hIDTgaiBpwNe8fPNEoNOBqMGnA1RDQ/NODVHmlBpkNEwNPDVCDTgaZm0TA04NUQNOBoIaJAacGqMNTs0yGiUGnA5qENT1agzaJgacDUYNPBpkNDwaeDUWaUGmQ0Sg08GoQ1ODUyGiYGnA1EDTwaCGiQGnA1EDThTIaJQafmogacDTIaJQa3vB/iibwtrEd2m5oG+SeP++n+I6iueDU+MM7qiAszEAAdSaitTjUg4T2Zph6s6NSNSm9VsfUVpdQ31rFdW7iSGVQ6MOhBpL29t9Ns57y7mSG3gQySSOcBVAySayvBmiy6B4bs7CeRnlVSz5PCljkqPYZrxr9pf4iGMReDNPlwXAmv2U9uqR/8Asx/4DX59DDqpW9nB3V9/I/ZadaXsY1Kis2lp5nlnxQ+IFz8Q/E0t+25LGHMVnCf4I89T/tHqfy7VyINRg08Gvp6cFCKjHZHm1G5O7JAacDUYre8GeEdQ8ba/b6Ppy/PId0khHyxIOrn2H6nirclFOT2OdxcnZGr8OPh5qXxD1kWlsGhs4cNdXRX5Yl9B6sewr668M+GNM8JaRDpWlW4ht4hyerSN3Zj3JqLwj4T03wXoVvpGmR7Yohl3I+aV+7t7mtmvmcZjJV5WXwo9jDYVUld7i0UUVxHWFFFFABSYpaKAEozS4oxQAUUUUAJSijFJmgBaTNLSUALmikooAWjNIKWgArnfGXgyz8WWRVwsV5GP3M4HI9j6iuhzS1dKpKlJTg7NGOIw9OvTdKqrpnzNqml3ei30tjexGKaI4IPQ+49RVcV9D+I/CWl+KIQl9CRKowkyHDp+PcexriZfgovm5h1srHno9vkj8Qwr67C57RlBe20Z+c4/hPFQqP6uuaPTXU8yVWZgFBJJwAO9e7fD7w9J4f8AD6JcKVubhvOlU/w5HA/AYqLw18ONI8PSrcndeXS8rLKBhD7L2rrK8rNc1jiUqVL4fzPe4d4fngpOviPi2S7CUtFFeGfXHM/Ez/kn/iD/AK8Zf5V8ehq+wvibx8PvEP8A14y/yr45Br6XIvgn6ny+fL95H0JgaUGowacCDXvHz7RIGpwaogacDTIaJgacDUQNPBoIaHg08Gos04NTIcSUNTg1Qg08GmQ0Sg0oNRg04GmQ0Sg04GogacDTM2iYNTg1RA04GgzaJQ2acDUQNOBoJaJQacDUYNOBqrmbRKDTw1Qg04GmQ0TA04Gog1OBoIaJQacDUQNOBpkNEm6u6+Enh3+2fEH22ZN1tYASc9DIfuj+Z/AVwQr6J+HHh/8A4R/wtaxyJtuLgefN65YcD8BgV5Oc4r2NBxW8tP8AM97hzAfWcWpSXux1/wAi/wCMfE9r4P8ADV/rl2RstYiypnHmP0VR9TgV8N6vq13ruqXWqX0plubqVpZGPck/yr279qLxmZ76y8JW0v7u3AuroA9XI+RT9FOf+BCvBRXj5dQ5Ic73Z+hYiV3bsPFPBqMU8V6iOOSJ4IZLiaOGGNpJZGCIijJZjwAB619hfB/4cRfD/wAOKLhEOrXgEl3IOdvpGD6DP4nNeS/s3/D0atqb+LNQhza2L7LRWHDzY5b/AICCPxPtX0vXh5niuZ+yjstzswlC3vsKKKM15J3BRRRQAUUUmaAFopM0UALRSUopAJRS0UwCkpaKACkpaDQAlFLRQAUZoooAMUUUUAFJS0UAIKXNFFABRRRQBzHxP/5J74h/68Zf5V8cA19j/E7n4e+If+vGX+VfG4619JkT9yXqfNZ4r1I+g8U4GmA0ua9654DRIDSg1GDTgaZDRIDUimoQc04HFMhomzS5qPdTgaCWiQU4Go80oNO5m0Sg04GogacpppkNEoNOBqMGnA0yGiUNTgaiBpwNMzaJQacDUYNLmmQ0TBqeDUCmpAaRDRKDSg1GDTgaZm0Sg04GowaXNMholBp4NQg05WpkNHSeBdG/t/xRY2bLui3+ZL/uLyfz6fjX0ZqF9BpdhcX1y4jgtomlkY/wqoJP6CvLPgXpIJ1HVnXptt4z+rf+y1P+0f4kOh/DqWzicrNqky2owedn3n/DC4/4FXyGbVHXxapLZaf5n6Nw1hvYYP2r3lr/AJHy34n1+fxR4j1HWrknzLydpcH+FSflX8BgfhWbTRThXpRSSSR6Uhwq/omlXOvavZ6XZoXuLuZYUHuTjP0HWqAr3D9mDwh/aGvXnia4jzFp6eTASP8Alq45I+i5/wC+qzr1fZU3MmMOaSR9CeFvD1r4U8P2Oi2S4htIgme7N1Zj7kkn8a1c0UV8s227s9NK2iFpKKWkMKKKKACkNLRQAlGKWigBMUtFFIAooopgFFFFABQaKSgBaM0lBoAXNFJS0AFFFFABRSZpaACikNLQAUUUUAcx8Tv+Se+If+vGX/0GvjUGvsr4n/8AJPPEP/XjL/6DXxnmvosk+CXqfPZyr1I+hIDS1GDinZr3kzwnEeDTgajpQaZm4kgNOBqMGlBqjNolzTg1RBqcDQS0TZpVNRhqcDTM2iUGlDVGDTgaCHElDU4GogacDVENEoNOBqMGnCmZtEgNOBqMGnA0XIaJAaeDUQNOzTIaJg1ODVCGp4NBDRKDTgaiBp4NMzaJM04Go81JbxNcTxwp96RggHuTik5WVxKF2kfSHwv0z+zPBOnqVw86m4b/AIEcj9MV4T+1Rr/2zxZp2io+UsLXzXAP8ch/+JVfzr6bsrdLOzgtoxhIY1jUewGK+JPi9rH9t/EvxBdBtyJdtAhzn5Y/kGPb5a+Mwb9riZVH5s/WKdJUqEaa6JI5PNKKYDTga9m5m0SA19qfBvwyPC3w70m1ZAtxcRC7n453yfNg/QbR+FfIXgvRW8R+LNJ0kAkXd1HG2Oy5+Y/lmvvFEWNFRFCqowAOgFeTmlTSMDbDx1bH0lAoNeOdQUtJRQAtFFFABRRRQAGkzS0lAC0lFAoAKWkNFAC0lFKKACiiigApKDRQACloooAKM0UlABS0CigAoopDQAtFIKWgDmPih/yTvxF/14y/+g18YA19nfFA4+HfiL/rwl/9Br4vBr6LJPgl6ng5uvfj6EoNOBqIGnA17h4jiPzS00HNLmmmQ4jgacDTAaUVVzOUR4NOBpmaUGncyaJQc0oNRg04GncholDU4NUQNODUyGiUGng1CDTg1BDRMGpwaoQacDTuQ4kwNODVEDTgadzNolBp4NRA04NTIaJAadmowaUNTIaJQ9PDVCDTgaCGicGt7wNaC+8YaPARkG7jYj1Cncf5Vzoau2+D0In8fafkZCLI/wCSH/GufFy5aE5eTN8DT58TTj5o+irudLS0muJDhIY2dj6ADNfnxd3T3t3NcyffmkaRvqTmvuz4i3ZsPAXiG5U4MenTkf8AfBFfBtfLZWtJM/UKvQeDSg00UoNesc7PWP2atJXUfiXFcMoK2FrLcDPrwg/9Dr66r5t/ZMst+p+Ib7H+rhhhB/3mY/8AslfSVeBmEr1mux1UVaIlHWiiuE1DFGKWigBKWikoAWikzS0AFFFIKAA0UppKADtRSig0AJRRRQAtIaO1FABSigUUAFFIaBQAtIaU0lABS0mKKAFoxRRQAUUZpKAOX+KX/JOvEf8A14S/+g18XZzX2j8Uj/xbnxH/ANeEv/oNfFgPNfQ5L8EvU8TNVecSQGnZpgNLmvbTPHcR+aUNTBSimZtEmcU4GowaUGmiGiTNLmmA0uaq5k4jwacDUeaUGnczcSUGnA1EDTgaozaJQacDUYOacDighokBp4NRBqcDTIaJQacDUQNOBpkNEwanA1EGpwNMzaJQadmog1KGpkNEoanhqhDUoNBDRNmvRfgWgk8bFj/BaSH9VH9a82DV6V8BnH/CayL62cn/AKEtceYv/Zp+h3ZVH/a6fqeo/GebyPhb4kYZ5tCvHuQP618P19t/G5S3wq8RAf8APsD/AOPrXxIa+eyz4H6n6LV3FpRTRSivTRiz6Y/ZLhC6L4hnx9+5hTP0Vj/7NXvdeE/smt/xTeur3F6h/OMf4V7vivnMa/30jqp/ChBS0lGa5SxaKTNGaAFpKM0YoAKKKKACilxSUAFFFFAAKKWkNABRRRQAGiigUAApaSigBaKKKACjFFFABiiiigApCaWkoAKKKKAOW+KY/wCLc+I/+vCX/wBBr4rr7V+KXHw58R/9eEv/AKDXxTmvfyZ+5L1PHzJXmh4NOBqMe1KDXtpnlSiSZpwNRg04GnczcR4NOBpgNLmqMmh4NKDTM0oNBDQ/NLmm0oqkzNoeDTgaYDS5qjJxJQadmogacDTM2h+aeGqPNKDTIaJQacDUQNOBpktEwNOBqEGng0GbRIDTwaiFPBqiGiQUoNMBpQaCGiQV6H8DJRH48jUn/WW0qj8gf6V50DXZ/CG6Fr8QdKJ/5aM8f/fSMK5ccr4ea8mdOXvlxVN+aPcvi3B9o+GfiVAAf9Alb8hn+lfDNffvi6xOpeFdYswu4z2U0YHqShAr4Cr5vLH7skfotXcKUGkoFeoZH0l+yRcbrPxLbk/dkt3H4iQf0FfQdfL37J+oCLxXrOnk/wCvsRKP+AOB/wCz19QZr57HxtWZ0U/hFIpKXNFchoGKSjNFABRRRQAUuKSlzQAUhpaKAEoFFAoAWkzQaKADFLRRQAUUUUAJmiiigBaKKKACiiigAooooAKSlooASijFGKAOX+Kf/JOPEn/XhL/6DXxMDX2x8VOPhx4k/wCvCX/0GviYGveyf4Jep5WYK8kPFOzTAaXNeyjzGh+aUGmZpQapMzcSQGnA1HTgaq5m4j6UGmZpQaaZm4kgNO+lMBpc0zNofmlBpgOaUcU7mbiPBpwamA0uapMzlEkBpwNRA04GquZuJIDTgajBzTgaZm0Sg04GogacGpktEwbNOzUINODUGbRKGpwNRA04GmQ4koatfwlqA0zxRpN4SQsN3Ezc9twz+maxc04E5zUzXNFx7hB8k1LsfarAOpB5BGK/P7xJpp0fxDqmnMNptLuWDHptcj+lfeHhnUhrPh7TdQBz9ot45D9Soz+ua+Rf2gdF/sb4o6qVXbHe7LtOMZ3L83/jwavkMufLUlB/1Y/SpNSgpI84pM80tIa9gyPQvgNrI0X4o6M7Ntjuna0f/gakD/x7bX2nX56aZfy6ZqNrfwHbLbSpMh91II/lX39ouqQ63pFlqducw3kCTp9GUH+tePmcPeUjak+hdpaSivLNgooFLQAmKKWkNABRRRQAtFFFACUUGigBaKKKACjNHWjFABSGlooABRQKKACiikoAWiik60ALRRRQAUUUUAFFFAoA5X4q/wDJN/En/YPm/wDQa+Iwa+3Pirx8NvEn/YPl/wDQa+Iga93KPgl6nm41e8h4NOBpgpc17KZ57iPzTgajzTgaZm0SClzTAaXNVczaHg0uaYDTs00zNxHg0tNBpc1VzJxHg04Go80oNMzaJKcDTAaWmQ0PzSg0wGlzVJmbiPBpwNRg04GqTMnElBpQajBpwNMzaJAacDUYNOBoIaJQacDmolNPBpkNDwacDUYPrTgaCWj6V+BGsjUvBIs2YGSwmaLH+yfmU/qR+FeeftY+H+NE8Qxpx89lKwHf76f+z0/9n3XxYeJ7nSZHxHqEOVB/56Jkj9C35V6j8ZPC58W/DvVrGNN9xFH9qgx13x/NgfUZH418lio/V8bfo9fvPusqq+2wke60+4+ITSUtFeqdIgr64/Zn8U/254B/sqWTdcaRKYcHr5TZZD9PvD/gNfJFemfs/eM18JeP7eG4l2WOqD7HMSeFYn5G/wC+sDPoxrlxtL2lJ23RUJWZ9kUUUuK+dOoSigiigBc0daSigAoNLSUAFFFLigBKKMUCgAozS0lAC0UCigAoopKQC0UCg0AFFIKWmAhoFLSUALRRSUALRRRQAUUUUAcp8V/+SbeJf+wfN/6DXxCDX298V/8AkmviX/sHzf8AoNfD1e5lPwS9Tgxa1RKDS5qMGnA17CZwuI8U4GmA0tUmZtDwacDUYNOBqjNxH5pwNRg07NBm0SA04GogacDVJmbiPpQaaGpc1VzJxHg04GowacDTRDQ/NKOKYDTgadzNofmlplKDTTM3EkBpQaYDS5qkzNxJA1OBqLdTlNMycSYGnBqiBp2aZDRKDS7qiBpwNMho09B1ebQtZstUgJ8y1mWUDPUA8j8RkV9j2V3BqdjBdwMJILiNZEPZlYZH6GvicGvo/wCAXikat4ZfRp5M3OmthAepibkfkcj8q8LO8PzQVVdD38gxHLUdF9dj5s+LXhFvBfj3VNMVCts0n2i2OODE/wAwA+mSv/Aa46vqj9p7wQdY8NweJrWLdc6Wdk+By0DH/wBlbB+hNfK9Z4Sr7Smn1PpJxswpVdlYMpIIOQR2NJiiukg+3Pg146Xx54ItLyWQNqFqPs14M8+Yo4b/AIEMH6k+ld1XxV8FfiK3w98XRy3DkaXfYgvF7KueJP8AgJOfpmvtKKVJoklidXjcBlZTkMD0Ir53GYf2VTTZnTTldD6DSZpc1yliUtJRmgBaTFLRQAlLRRQAUUUUAFFJmigBaKQGloAQ0UUCgBaDRRQAmKWiigAooooAKSlooAKKKKACiiigDlPivx8NfEv/AGD5v/Qa+HM19xfFj/kmnib/ALB83/oNfDYNe3lPwS9TjxK1RIDTgaiBpwNeumcjiSg0uajBpwOaq5m4jwacDUYNOBqkzJxJM0oNMpQadzNoeKcDTAaUGmZtDwaXNMBp1O5DQ8GniowacGqkzJxH5pQajzSg1Rm4kuaBzUYNPBpmbQ8HFKDTAaUcU7mbQ+lBpoNLTTM3EkBpwNRCnA1Rm4koanCos04NTM2iUGup+HPi1/B3iq01EsfszHyblR/FE3X8uD+FcmGp4NRUpxqQcJbMdKcqc1OO6Pti5t7TWdNkt5lS4tLuEow6rIjDB/Ag18M/ETwZc+A/Ft9os4Yxxtvt5D/y0hP3W/ofcGvqT4C+JbzW/Cj2N3HIf7NcQxzkcOhGQufVen0xVf8AaA+Gp8beGP7S0+Evq+lq0kYUfNNF1ZPc8ZHv9a+RoyeFrulPY+9pVFXpRqR6nx/TadSYr2iRRX0t+zh8Vxe2yeC9Zn/0iEf8S+Vz/rEHWIn1Hb247CvmkVYtLmayuYrm2leGeJg8ciHDKw5BBrLEUFWhysFLldz9DKO1eafBj4uW3xC0tbG/kji161QedH0E6jjzFH8x2PtXpdfN1KcoS5ZbnWpJq6CiijNQMWikpaACkzS0hoAWkzR0ooAKKKMUAFFGKWgBKBRRQAtFFFAAaTNLSYoAWjFAooAKTNedeNvioNLuJNN0QRTTodslw3Koe4A7muCfx34mmkMjaxdAnspCj8hxXr4bJa9aPPol5nzWO4owmFqOmrya3sfQWaM15J4Y+K19bzpb63tubdjjz1UB09zjgj9a9ZhljniSaJ1eN1DKynIIPeuPF4KrhZctRHp5bmuHx8HKi9t090PooorkPSOT+LH/ACTTxN/2Dpv/AEGvhnNfc3xY/wCSaeJv+wdN/wCgmvhcGvZyp+7I5q61RIDSiowacDXro5WiQGnA1HmnA1RDQ8GnA0zNLmnczaJAaUGmA0oNUZuI8GnA0wGlBp3M3EeDTgajFOBqjNxJM0oNR5pwNNGbiPzS5pgNKKaZm4kgp1Rg07NXcyaHg04GowacDQQ0P+lKDTAadmmZtDwadmogcU7NUmZuI/NOB4pgNLmqTMpIkBrT8P6LeeItXtdKsYzJcXLhFHYDuT7AZP4VkjkjHJr6b+CPw3PhbSv7a1KLbqt8g2ow5giPIX2J4J/AVx47GLD0+br0OnA4J4moo9Op3PhTw3aeEtBtdIsx8kC/M+OZHPLMfqa2KSlFfFSk5Nyluz7iEFCKjHZHyf8AtEfCs+FNYPiTSocaTqEh81EHFvMeSPZW5I98j0rxqv0H1vRbHxDpVzpWpQLcWlyhjkjbuD39iOoNfFPxQ+G2ofDbxC9jOGmsZiXs7rHEqeh9GHQj+hr2sDiudezlujKpG2qOOFPWmU4GvSMWaGj6ve6HqNvqWnXL213bsHjkQ4INfXPwj+Men/EKySyvDHaa7Ev72DOFmA/jj/qOo+nNfHK1Zs7u4sbmK6tZpIJ4WDxyxsVZGHQgjpXPicLGutdyYVHBn6DUV4b8K/2h7XVVh0fxfIlre8JHfniKb/f/ALre/Q+1e4qyuoZSGUjIIOQa+frUZ0pcs0dsJqSuhaWikNZFC5opMUtABSGloNACCloFFABSGlopAJS0UmKYC0UUUAFFFV7/AFC00u1e7vbiO3gjGWdzgCmk27IUpKKu9ic8V5b8RfiYFWXR9Dmyxys90h6eqqf5msTxz8VZ9cEmnaP5lvYn5XlPDzD+i/qa4EGvpctyizVWuvRf5nw+ecRcydDCv1f+X+ZKvWpUqFalU19Oj4KaJga9k+EuqyXugS2kjFjaSbUz/dIyB+ea8ZBr2T4RabJaaBNdyKR9qlyue6qMZ/PNeNn3L9W13urH0fCPOsf7u1nc7ug0gpa+LP1M5P4s/wDJM/E3/YOm/wDQTXwqDX3T8Wjj4ZeJz/1Dpv8A0GvhUV7GV/DIwq7jwaUUwGnA16yZg0PzSg0zNKDVXIaJQaAaYDS5p3M3EkBpwaowadmquZuJJmnA1EDTgaZm0SZozTAaUGquZtEgNOzUYNKDTM3EkBpQaj3UoNO5DRKDTgajBpwNUmZOJJRmmg0uaq5m0OpwNMBp30pmbQ/NKDimA0oNMzcSQHNLmmg1658Hvg5J4lki13X4Hj0lDuhgYYN0R3/3P51jXxEKEOebKo4aVaXJBGl8DfhT/aEkXinXIP8ARkIaygcf61h/y0I/ujt69fr9B0yONIY1jjRURQFVVGAAOwp1fH4rEyxE+eR9dhcLHDw5Ii0UUVznSFYHjfwVpXj3QZ9H1WLKP80UoHzwSdnU+v8AMZFb9FNScXdAfBvjzwJq/wAPtdk0rVYuOWguFHyTp2ZT/Mdq5wV96eOfAuj/ABA0STStXhyDloZ04kgfsyn+nQ18cfEP4aa38N9WNpqURktZCfs14iny5h/RvVa97CYtVVyy3OacLbHLLUgqNTTwa70c8kPFek/Dn43eIPAmyzlY6npQ4+yzNzEP+mbdvp0rzUVKpoqUoVFyyVzLmcXdH2z4K+KPhnx3Cv8AZl8qXeMvZz/JMv4fxfVc11tfn9BNJBKksMjxyIcq6HBU+oNep+Dv2hvFfh0R2+pMmtWa4GLg4lUezjr/AMCzXkV8qa1pO/kdEMYtpn1fRXm3hn4++DPEASO5vH0i4bGY70bUz/vj5fzxXoVpe2t/As9ncw3MLcrJC4dT9CK8ypSnTdpqx1wqRn8LJ6KSlFZlhRRSUALRSUUALRSCqGq6/pOiRmTUtRtbReo82QKT9B1P4U4xbdkiZSUVeTsaFISFBJOAO9eYa/8AHjRbLdFo9tNqMo4Ejfu4wfx5P5V5l4i+JPiPxQWS6vTBbH/l3tvkT8e5/E16WHymvV1a5V5nj4vPcNQ0i+Z+X+Z7H4t+LeieHw9vZuNRvhxsiPyIf9pun4DJ+leM+IfF2r+Krrz9SuSyA/JCvEcf0H9TzXPpxU6GvpMHl1LD6pXfc+MzLN8Ri9JO0eyJ0qVahQ1Kpr0keDJEqmpVqFa7jwJ8PLnxHIl5eq8Gmqc5xhpvZfb3rOviYUIc9R2RWGwVXFVFSoq7ZH4F8E3Hii6E8ytFp0TfvJP+eh/ur/U9q9yt7eK1gjt4I1jijUKiqOAB0FMtLO3sLaO2tYlihjG1UUYAFTV8Rj8fPFTu9lsj9SyfKKeX0uWOsnu/66C0UUVwnrnJfFv/AJJl4n/7B03/AKCa+Fa+8viZaPffDzxHbRjLvp0+P++Ca+DRXsZZ8MjGruFLQKK9VGQZpwNMpQaZLRJmlBpgalppkNEgNLTBTgaq5m0PBp2ajzTs07kOI/NKDUdOBppmbRIDmlpgNOBqkzNodTgaYKUGmZuJIDTlNRA08GqM3ElBozTQaWmjNxHA06mA04NVJmbiOFOGSQACSeAB3q/4f8O6r4o1BNP0iylu7h+yDhR6segHua+lPhn8DtN8HmLU9YMeo6uvKnGYrc/7IPU/7R/ACuXFY6nQWur7GtDBzrPTbucb8J/gVJdmHXPFkDRwcPBp7jDSehk9B/s9+/ofoGNEiRY41VEUAKqjAA9BT6TFfLYnEzry5pn0WHw0KEeWIUCigVznQLRRRQAUUUUAFZ+veH9M8T6XNper2cd3aTDDRuOh7EHqCPUVoUU02ndAfInxU+AureB2m1PRxLqeiZLFgMy2w/2wOo/2h+OK8qBr9DyAQQRkHtXj3xJ/Z00fxQ02peHWi0jU2+ZosYt5j7gfcPuOPavWw2YfZq/ec9Sj1ifKi1Itanifwfrvgy/NjrmnzWknO1mGUkHqrDgispa9iElJXRwzVtCQVItRrTxWiOeSJlrQ0zWdS0aYTabf3VnJ/eglZD+lZqmpFNVZPRnNK6d0eiaT8dfHembQdWW8Rf4bqFXz9SMH9a6qx/ac16MAXuiabOe5iZ4/5lq8VWpFrKWBoT3ijN4utDaTPfof2oIyB5vhZwfVb0H/ANkqwf2mrMjjw1cZ97of/E18+rUy1H9lYb+X8WQ81xK+1+CPc5/2l5WH+jeGkQ9jJdlv0CCsm7/aI8UXIItrLTLUHvsZ2H5tj9K8mWp0rWGW4aP2TmqZnin9s7DUvij4w1fK3GuXKIf4IMRD/wAdANc888txIZJpHlkbks7Ek/iaqpU6V2U6MIfAkjy61apU+OTZOlSpUKmpFNbI45IsLUqGoVqVTVHPJE6mp4Y3mkWONWd2OFVRkk+grY8KeBdZ8Vyg2cHl2wOGuZRhB9PU/Svb/CPw/wBJ8JIJIk+03pGGuZBz/wABH8IrzsZmlLDqy1l2/wAz0cvyKvjHzNcse7/Q47wP8J2zHqHiFMD7yWf/AMX/AIfn6V6tGixoqRqERRgKBgAU6ivk8Ti6mIlzVGfoGAy6jgoclJer6sTFHSlormO4KQ0tFADJoknheGRQySKVYHuCOa+CvHfhafwZ4t1PQ51IFtMwiY/xxHlG/FSK++K8o+O3wi/4T/S11TSY1GuWKEIvT7TH12E+o6g/h347MDXVKdpbMicbo+QKKlu7S4sbmW1uoZIJ4mKSRSKVZCOoIPQ1EK+gTOcSilxRimAZpQaQ0UxWJAaWmA0oNO5DQ8GlBpmaUGmmQ0PBp4qMGnA1SM2h4NOBpgNKOKozaHg4paaKdTuZuI4GnA0wc06mmQ4jwaUNWz4f8D+JfFLquj6NeXSk481YyIx9XOFH51634U/ZfvJik/ifVUt06m2svmf6FyMD8Aawq4ulS+KQ44ac/hR4ja2895OlvbQyTzSHakcalmY+gA617D4E/Z01fWDHeeJpG0u0OG+zrgzuPfsn48+1e7eFvAHhvwZCI9F0uGCTGGnb55X+rnn8OldFivHxGbSlpSVvzO6jl0VrU1Mjw54W0bwlYLY6NYRWkI+8VHzSH1ZurH61rUuKK8mUnJ3Z6KSSsgoopCaQxaKTNLmgAooooAKKKKACjNFFABRSCloApavoum6/ZPY6rY297bOOY5kDD6jPQ+45rw/xt+y/bzNJd+EL4W7Hn7FdsSn0V+o/HP1r32itqWIqUneDInTjLc+E/EfgnxF4QnMOt6Tc2fOBIy7o2+jjKn86yAa+/rm1t72B7e6ginhcYaORQysPcGvOvEv7PvgjxBukt7OXSbhv+Wlk+1c/7hyv5AV6tHNVtUX3HFUwb+yz5JU1Ipr2TXv2X/EFmzPouq2WoR9QkwML/wBR+orhNW+FnjXQixvPDl+VXq8Ceco/FMivSpYujP4ZI8+rh6kd0c2tPWkkhlt38uaJ4nHVXUgj86Frri10PPqRZMtSqagU1KprZHHNEympkNQrUq1RzyRYQ1MhosrC7vnCWtrPcMeixRlz+ldXpPwp8ZasVMeizW6H+O6Iix+Dc/pUTr04azkkRHD1KjtCLZzKmpUNet6L+z1cMVfWdYSMd47VNx/76b/CvRNA+GXhbw7te301J51/5bXJ8xs+ozwPwArz62c0IaR95ndRyDE1fj91eZ4V4b+H3iLxMVazsHjgP/LxP8kePUZ5P4A16z4W+DGj6Tsn1Z/7TuBzsYYiU/7v8X4/lXogAAwAAPalxXi4nNq1bRPlXke9hMhw1B80lzPz/wAhscaQxrHEixoowFUYAHsKeKKK8w9tK2wUUUUgCiiigAoxRRTAKKKKAOG+IXwd8M/ERTNfQNaaiFwl9bYEnsGHRh9efQivCdf/AGWvF+nyMdIu7DVYf4cv5Mh+obj/AMer6vorpo4urSVk9CXBM+LT+z/8Rwcf8I+T7i4i/wDiqP8Ahn/4jf8AQvn/AMCIv/iq+0qK6P7Tq9kT7NHxb/wz98Rz/wAy+f8AwIi/+Kpf+GfviP8A9C+f/AiL/wCKr7Roo/tOr2QezR8Wn9n/AOI//QvH/wACIv8A4qj/AIUB8R/+hfb/AMCIv/iq+0qM0f2nV7IXskfFo+APxH/6F4/+BEX/AMVTh8APiP8A9C+f/AiL/wCKr7PpaP7Tq9kL2MT4x/4UF8Rv+hfb/wACIv8A4qgfAP4i9/D7f+BEf/xVfZuaKf8AalXshfV4nxoPgH8Rf+gAf/AiP/4qnp8AviIx/wCQDj63MQ/9mr7Ioo/tSr2RP1aJ8j2v7N/xAnOJLSwtveW7U/8AoOa6DTf2VvEE206hr2nWo7iJHlI/PbX0xQKmWZ13s7DWFgeKaT+yz4dtiranrOpXrDqsIWFSfyY4/Gu70L4ReCPDpV7PQLV5V6S3AMzf+PZx+FdjRXNPFVZ/FJmkaMI7IYkaRIERFRQMBVGAKdS0lYGgtFFFABRRRQAUlLRQAlFLSUAANLSUtABRRSZoAWiiigAooooAKKKKACiiigAooopAVrrTbK+Qpd2dvcKeoljDA/mKw7v4aeDL4kz+GtMJPUrAEP6YrpaKuNSUdmTKEZbo4eT4J+AJTk+Ho1/3Z5R/JqjX4G+AVbP9ik+xuZcf+hV3lFaLFVv5n95k8NRe8V9xxsPwf8C25ynh63P+/I7fzY1qWngXwtYnNv4e0xD6/Z1P8xW6aMVLr1HvJ/eNYektor7iOG3ht1CQwxxqOgRQB+lSUtFZ7mqSWwlAFFANAxaKKKQBRRRTAKKKKACiiigAooooAKKKKACiiigApO9LRQAUUUUAFJilooASloooASlpKKADNLSUooAKKKKACiiigApKWigAooooAKKKKACiiigANJS0mKAACloooATNFLRQAUUUUAFFJS0AFFFFABRRRQAUUUUAFFFJigBaKSigBaKQUpoAKKSloAKSlooABRRRQAUUUUAFFFFABRRSGgBaKQUtACYpaKKACiiigAooooAKKKKACiiigAozRRigBKKKKACilFGKACiiigAooooAKKKKACiiigBDQKWigAopKWgAoopO9AC0UUUgCiiimAUUUUAFFFFABRRRQAUUlFAC0UUUAFBoooASgUUooAKMUUUAFFFFAAaKKKACiiigAooooAKTNLSUALRRRQAUUUUAFFFFABmiiigAooooAKKKKACiiigAooooAQ0UuKKACiiigAooooAKKKKACiiigAooooAKKKKAENApaKACijNFABRRRQAUUUUAFJS0YoAKKKKACiiigBKXFFFABRRRQAUUUUAFFFFABRRRmgAooooAKKKKACiiigAoopM0AGaKWkxQAoooopAFFFFMAooooAKKKKACiiigAooooATNLSUtABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUABpKWkxQAYpaKKACiiigAooooAKKKKACiiigAooooAKKKKQBRRRTAKKKKACiiigBMUUtGKAEFLRikoAWijNJmgBaKKKACjFFFABRRRQAUUUUAFFFFABRRRQAUUUhoAKWkFLQAUUUUAFFFFABRRRSAKKKKYBRRSUALRRRQAUUUUAFFFFABSClooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooFFABRRRQAUUUUAFFFFABRRRQAUUUUAJRilooAKKKKACiiigAooooAKKKKACiiigAooopAFJS0UwCiiigAooooAKKKKQBRRRTAKKKKACiiigAooooAKKKKACiiigAooooAKM0UUAJmlFJiloAKSlpPwoAKUUlFAC0UUUABpKWigAooooAKKKKACiiigAooooAKKKKACiikoAWiiigAooooAKKKKACiiigAooooAKKKKACiiigAooopAf/Z" alt="Digital Chances" />
+      <div class="brand-copy">
+        <span class="kicker">Digital Chances</span>
+        <h1>Start a new engagement</h1>
+        <p>Tell us who's joining and a few details. We'll set up your record and get the right person on it.</p>
+      </div>
+    </div>
+    <div class="trust-chip"><span class="dot"></span><span>Secure intake</span></div>
+  </header>
+
+  <div class="steps" id="stepbar">
+    <div class="step active" data-step="1"><span class="n">1</span> Details</div>
+    <div class="step-sep"></div>
+    <div class="step" data-step="2"><span class="n">2</span> Review</div>
+    <div class="step-sep"></div>
+    <div class="step" data-step="3"><span class="n">3</span> Done</div>
+  </div>
+
+  <div class="roles" role="group" aria-label="Who are you onboarding?">
+    <button type="button" class="role" data-role="client" aria-pressed="true">
+      <span class="glyph"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/></svg></span>
+      <span class="rname">Client</span>
+      <span class="rdesc">A paid engagement. Sets up a project space and an owner.</span>
+    </button>
+    <button type="button" class="role" data-role="intern" aria-pressed="false">
+      <span class="glyph"><svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5zM6 12v5c0 1 3 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg></span>
+      <span class="rname">Intern</span>
+      <span class="rdesc">A placement. Captures mentor, dates, and goals.</span>
+    </button>
+    <button type="button" class="role" data-role="contractor" aria-pressed="false">
+      <span class="glyph"><svg viewBox="0 0 24 24"><path d="M14 7l-1-2H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-4zM9 13l2 2 4-4"/></svg></span>
+      <span class="rname">Contractor</span>
+      <span class="rdesc">A scoped engagement. Captures terms and deliverables.</span>
+    </button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <span class="tag" id="panelTag">Client</span>
+      <h2 id="panelTitle">Client engagement</h2>
+    </div>
+
+    <!-- STEP 1: FORM -->
+    <form id="form" novalidate>
+      <!-- shared -->
+      <div class="section-label">Contact</div>
+      <div class="grid">
+        <div class="field">
+          <label id="lblName">Name <span class="req">required</span></label>
+          <input name="name" data-shared placeholder="Full name or organization" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label>Point of contact <span class="hint">name or @discord</span></label>
+          <input name="contact" data-shared placeholder="Who we coordinate with" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- CLIENT -->
+      <div class="role-fields" data-fields="client">
+        <div class="section-label">1 · Company & Contact</div>
+        <div class="grid">
+          <div class="field">
+            <label>Industry / sector</label>
+            <input name="industry" placeholder="e.g. Fintech, Education, Retail" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Company size</label>
+            <select name="companySize">
+              <option value="">Select…</option>
+              <option>Solo / freelancer</option><option>2–10</option><option>11–50</option><option>51–200</option><option>200+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Main contact role <span class="hint">their title</span></label>
+            <input name="contactRole" placeholder="e.g. Marketing Lead" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Contact email <span class="req">required</span></label>
+            <input type="email" name="contactEmail" placeholder="name@company.com" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Contact phone <span class="hint">optional</span></label>
+            <input name="contactPhone" placeholder="+254…" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Project sponsor / decision-maker</label>
+            <input name="decisionMaker" placeholder="Who signs off" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="section-label">2 · Project Details</div>
+        <div class="grid">
+          <div class="field">
+            <label>Project name <span class="req">required</span></label>
+            <input name="projectName" placeholder="Short working title" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Engagement type</label>
+            <select name="engagement">
+              <option value="">Select…</option>
+              <option>Fixed project</option><option>Retainer</option><option>Hourly</option><option>Pilot / trial</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Project goal <span class="req">required</span></label>
+            <textarea name="projectGoal" placeholder="What is this project meant to achieve?"></textarea>
+          </div>
+          <div class="field full">
+            <label>Scope summary <span class="hint">high-level boundaries</span></label>
+            <textarea name="scope" placeholder="What's in scope (and notably out of scope)?"></textarea>
+          </div>
+          <div class="field full">
+            <label>Expected deliverables</label>
+            <textarea name="deliverables" placeholder="Concrete outputs the client receives."></textarea>
+          </div>
+          <div class="field full">
+            <label>Success metrics <span class="hint">how we measure "done well"</span></label>
+            <textarea name="successMetrics" placeholder="e.g. launch by date, X signups, page speed under Ys."></textarea>
+          </div>
+          <div class="field">
+            <label>Start date</label>
+            <input type="date" name="startDate" />
+          </div>
+          <div class="field">
+            <label>Target end date</label>
+            <input type="date" name="endDate" />
+          </div>
+        </div>
+
+        <div class="section-label">3 · Technical & Creative</div>
+        <div class="grid">
+          <div class="field full">
+            <label>Current tech stack <span class="hint">if any</span></label>
+            <input name="techStack" placeholder="e.g. WordPress, React, Shopify, n8n" autocomplete="off" />
+          </div>
+          <div class="field full">
+            <label>Required skills <span class="hint">comma-separated — helps us assign the right people</span></label>
+            <input name="requiredSkills" placeholder="e.g. web dev, branding, copywriting, automation" autocomplete="off" />
+          </div>
+          <div class="field full">
+            <label>Design style / references</label>
+            <textarea name="designReferences" placeholder="Links or descriptions of the look and feel you want."></textarea>
+          </div>
+          <div class="field">
+            <label>Content needs</label>
+            <select name="contentNeeds">
+              <option value="">Select…</option>
+              <option>Client provides all content</option><option>We create some content</option><option>We create all content</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Integration requirements <span class="hint">optional</span></label>
+            <input name="integrations" placeholder="e.g. Stripe, CRM, Mailchimp" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="section-label">4 · Team & Collaboration</div>
+        <div class="grid">
+          <div class="field">
+            <label>Communication style</label>
+            <select name="communicationStyle">
+              <option value="">Select…</option>
+              <option>Async (Discord/email)</option><option>Regular calls</option><option>Mixed</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Time zone / working hours</label>
+            <input name="timezone" placeholder="e.g. EAT (GMT+3), 9–5" autocomplete="off" />
+          </div>
+          <div class="field full">
+            <label>Known constraints <span class="hint">optional</span></label>
+            <textarea name="constraints" placeholder="Hard deadlines, compliance, tools you must/can't use…"></textarea>
+          </div>
+        </div>
+
+        <div class="section-label">5 · Budget & Priority</div>
+        <div class="grid">
+          <div class="field">
+            <label>Budget range</label>
+            <select name="budgetRange">
+              <option value="">Select…</option>
+              <option>&lt; $1k</option><option>$1k–5k</option><option>$5k–20k</option><option>$20k+</option><option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Priority level</label>
+            <select name="priority">
+              <option value="">Select…</option>
+              <option>Low</option><option>Normal</option><option>High</option><option>Critical</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Timeline flexibility</label>
+            <select name="timelineFlexibility">
+              <option value="">Select…</option>
+              <option>Firm deadline</option><option>Some flexibility</option><option>Flexible</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Confidentiality level</label>
+            <select name="confidentiality">
+              <option value="">Select…</option>
+              <option>Standard</option><option>Sensitive</option><option>Strictly confidential</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-label">6 · Team & Ownership</div>
+        <div class="grid">
+          <div class="field">
+            <label>Suggested team <span class="hint">comma-separated</span></label>
+            <input name="teamSuggestions" placeholder="e.g. Denis, Amina" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Internal owner <span class="req">required</span></label>
+            <input name="owner" placeholder="Who owns this internally" autocomplete="off" />
+          </div>
+          <div class="field full">
+            <label>Additional context <span class="hint">anything else we should know</span></label>
+            <textarea name="additionalContext" placeholder="Free text — background, history, expectations."></textarea>
+          </div>
+          <div class="field full">
+            <label>Relevant links <span class="hint">comma-separated</span></label>
+            <input name="links" placeholder="brief, figma, existing site, repo…" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERN -->
+      <div class="role-fields" data-fields="intern">
+        <div class="section-label">Placement</div>
+        <div class="grid">
+          <div class="field">
+            <label>Focus area <span class="req">required</span></label>
+            <input name="focusArea" placeholder="e.g. Frontend, Content, Data" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Institution <span class="hint">school / program</span></label>
+            <input name="institution" placeholder="e.g. University of Nairobi" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Placement type</label>
+            <select name="placementType">
+              <option value="">Select…</option>
+              <option>Attachment</option><option>Internship</option><option>Volunteer</option><option>Apprenticeship</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Supervisor / mentor <span class="req">required</span></label>
+            <input name="mentor" placeholder="Who supervises" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Start date</label>
+            <input type="date" name="startDate" />
+          </div>
+          <div class="field">
+            <label>End date <span class="hint">time-boxed</span></label>
+            <input type="date" name="endDate" />
+          </div>
+          <div class="field">
+            <label>Skill level</label>
+            <select name="skillLevel"><option value="">Select…</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+          </div>
+          <div class="field">
+            <label>Time commitment</label>
+            <select name="commitment"><option value="">Select…</option><option>Full-time</option><option>Part-time</option><option>Flexible</option></select>
+          </div>
+          <div class="field">
+            <label>Review cadence</label>
+            <select name="reviewCadence"><option value="">Select…</option><option>Weekly</option><option>Bi-weekly</option><option>Monthly</option></select>
+          </div>
+          <div class="field">
+            <label>Internal owner <span class="req">required</span></label>
+            <input name="owner" placeholder="Who owns this internally" autocomplete="off" />
+          </div>
+          <div class="field full">
+            <label>Learning objectives <span class="hint">what they should gain</span></label>
+            <textarea name="objectives" placeholder="Skills, projects, and outcomes for the placement."></textarea>
+          </div>
+          <div class="field full">
+            <label>Exit deliverable <span class="hint">what they produce by the end</span></label>
+            <textarea name="exitDeliverable" placeholder="A concrete output that marks a successful placement."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTRACTOR -->
+      <div class="role-fields" data-fields="contractor">
+        <div class="section-label">Engagement</div>
+        <div class="grid">
+          <div class="field">
+            <label>Specialty / role <span class="req">required</span></label>
+            <input name="specialty" placeholder="e.g. Motion designer" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Legal name <span class="hint">for contracting</span></label>
+            <input name="legalName" placeholder="Full legal / registered name" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Contract status</label>
+            <select name="contractStatus"><option value="">Select…</option><option>Not started</option><option>Draft sent</option><option>Under review</option><option>Signed</option></select>
+          </div>
+          <div class="field">
+            <label>NDA / IP status</label>
+            <select name="ndaStatus"><option value="">Select…</option><option>Not required</option><option>Pending</option><option>Signed</option></select>
+          </div>
+          <div class="field">
+            <label>Rate basis</label>
+            <select name="rateBasis"><option value="">Select…</option><option>Per project</option><option>Per day</option><option>Per hour</option><option>Milestone</option></select>
+          </div>
+          <div class="field">
+            <label>Reporting cadence</label>
+            <select name="reportingCadence"><option value="">Select…</option><option>Weekly</option><option>Bi-weekly</option><option>At milestones</option></select>
+          </div>
+          <div class="field">
+            <label>Contract start</label>
+            <input type="date" name="startDate" />
+          </div>
+          <div class="field">
+            <label>Contract end</label>
+            <input type="date" name="endDate" />
+          </div>
+          <div class="field">
+            <label>Internal owner <span class="req">required</span></label>
+            <input name="owner" placeholder="Who owns this internally" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Conflict of interest <span class="hint">declared?</span></label>
+            <select name="conflictDeclaration"><option value="">Select…</option><option>None declared</option><option>Declared — see notes</option></select>
+          </div>
+          <div class="field full">
+            <label>Engagement scope <span class="req">required</span></label>
+            <textarea name="scope" placeholder="What this contractor is brought in to do."></textarea>
+          </div>
+          <div class="field full">
+            <label>Deliverables & acceptance criteria <span class="hint">what "accepted" means</span></label>
+            <textarea name="deliverables" placeholder="Concrete outputs and how they'll be accepted."></textarea>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--ink-faint);margin-top:10px;line-height:1.5">Note: do not enter tax IDs, bank details, or other sensitive payment information here. Those are collected separately through a secure channel.</p>
+      </div>
+
+      <!-- governance: privacy + consent -->
+      <div class="governance">
+        <h3><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg> How your information is used</h3>
+        <p id="privacyText">The details you submit are used to set up your engagement record and route it to the right owner at Digital Chances. Information is stored in our internal system and may be processed by AI tools to help structure and summarize it. We keep records only as long as needed for the engagement, and access is limited to relevant team members. We don't post sensitive personal, financial, or contractual details to shared channels.</p>
+        <label class="consent">
+          <input type="checkbox" id="consent" />
+          <span>I understand my information will be stored and processed as described above, including AI-assisted structuring, and I consent to Digital Chances using it to set up and manage this engagement.</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <div class="readout" id="readout"><span class="rdot"></span><span id="readoutText">Fill the form, then review before sending.</span></div>
+        <div class="btn-row">
+          <button type="submit" class="btn primary" id="reviewBtn"><span class="label">Review</span></button>
+        </div>
+      </div>
+    </form>
+
+    <!-- STEP 2: REVIEW -->
+    <div class="review" id="review">
+      <h3>Review before sending</h3>
+      <p class="sub">Check the details are right. Nothing is submitted until you confirm.</p>
+      <div class="review-rows" id="reviewRows"></div>
+      <div class="actions" style="margin:18px -22px -22px;border-radius:0 0 var(--radius) var(--radius)">
+        <div class="readout" id="readout2"><span class="rdot"></span><span id="readoutText2">Ready to send.</span></div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="backBtn">Back</button>
+          <button type="button" class="btn primary" id="submitBtn"><span class="spin"></span><span class="label">Confirm & send</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONFIRMATION -->
+    <div class="confirm" id="confirm">
+      <div class="check"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h3 id="confirmTitle">Engagement started</h3>
+      <p id="confirmMsg">Your submission has been received and routed to the right owner.</p>
+      <div class="ref" id="refNumber">DC-000000</div>
+      <p style="font-size:12px;color:var(--ink-faint)">Keep this reference for any follow-up.</p>
+      <ul class="next-steps" id="nextSteps"></ul>
+      <div class="downloads" id="internDownloads" style="margin-top:22px">
+        <h3><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5z"/></svg> Your onboarding documents</h3>
+        <p>Download and read both before your first day.</p>
+        <div class="dl-row">
+          <a class="dl-btn" id="dlHandbook"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5z"/></svg><span>Intern Handbook <span class="meta">.md</span></span></a>
+          <a class="dl-btn" id="dlPolicy"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg><span>Policies &amp; Expectations <span class="meta">.md</span></span></a>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:24px">
+        <button type="button" class="btn" id="anotherBtn">Start another</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot-note">Digital Chances · Your details are handled per our privacy practices above.</p>
+</div>
+
+<script>
+const BASE = "https://autonomy.digitalchances.co.ke/webhook";
+const ENDPOINTS = {
+  client:     BASE + "/client-onboarding",
+  intern:     BASE + "/intern-onboarding",
+  contractor: BASE + "/contractor-onboarding"
+};
+const SHARED_SECRET = "";  // set to match the workflows' SECRET
+
+const ROLE_META = {
+  client:     { tag:"Client",     title:"Client engagement",     required:["name","contactEmail","projectName","projectGoal","owner"], nameLabel:"Company name" },
+  intern:     { tag:"Intern",     title:"Intern placement",      required:["name","focusArea","mentor","owner"], nameLabel:"Full name" },
+  contractor: { tag:"Contractor", title:"Contractor engagement", required:["name","specialty","scope","owner"], nameLabel:"Full name" }
+};
+
+const INTERN_HANDBOOK = `# Digital Chances - Intern Handbook
+
+Welcome to Digital Chances! This handbook covers what you need to know to get started.
+
+## 1. Who we are
+[Edit this section with your company overview.]
+
+## 2. Your first week
+- Meet your mentor and team.
+- Get access to the tools you'll need.
+- Review the projects you'll be supporting.
+
+## 3. How we communicate
+- Discord is our main hub. Check your assigned channels daily.
+- Ask questions early.
+
+## 4. Working hours & availability
+[State expected hours and how to log time.]
+
+## 5. Getting help
+Your mentor is your first point of contact.
+`;
+const INTERN_POLICY = `# Digital Chances - Policies & Expectations
+
+## 1. Code of conduct
+Treat everyone with respect.
+
+## 2. Confidentiality
+Client information and credentials are confidential.
+
+## 3. Data & security
+- Use strong, unique passwords.
+- Never share access tokens or credentials.
+
+## 4. Attendance & communication
+Let your mentor know in advance if you'll be unavailable.
+
+## 5. Acknowledgement
+By joining, you agree to follow these policies.
+`;
+
+const el = id => document.getElementById(id);
+const roleBtns = [...document.querySelectorAll(".role")];
+const form = el("form");
+let currentRole = "client";
+let pendingData = null;
+
+function setRole(role){
+  currentRole = role;
+  roleBtns.forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.role===role)));
+  document.documentElement.style.setProperty("--accent", `var(--${role})`);
+  document.documentElement.style.setProperty("--accent-soft", `var(--${role}-soft)`);
+  const m = ROLE_META[role];
+  el("panelTag").textContent = m.tag;
+  el("panelTitle").textContent = m.title;
+  el("lblName").childNodes[0].nodeValue = m.nameLabel + " ";
+  document.querySelectorAll(".role-fields").forEach(f=>f.classList.toggle("active", f.dataset.fields===role));
+  gotoStep(1);
+  el("internDownloads").classList.remove("show");
+}
+roleBtns.forEach(b=>b.addEventListener("click", ()=>setRole(b.dataset.role)));
+
+function gotoStep(n){
+  el("form").style.display = n===1 ? "block" : "none";
+  el("review").classList.toggle("active", n===2);
+  el("confirm").classList.toggle("active", n===3);
+  document.querySelectorAll(".step").forEach(s=>{
+    const sn = +s.dataset.step;
+    s.classList.toggle("active", sn===n);
+    s.classList.toggle("done", sn<n);
+  });
+}
+
+function collect(){
+  const data = { type: currentRole, submittedAt: new Date().toISOString() };
+  form.querySelectorAll("[data-shared]").forEach(i=>{ if(i.name) data[i.name]=i.value.trim(); });
+  const active = document.querySelector(`.role-fields[data-fields="${currentRole}"]`);
+  active.querySelectorAll("input,select,textarea").forEach(i=>{ if(i.name) data[i.name]=i.value.trim(); });
+  return data;
+}
+function labelFor(key){
+  const active = document.querySelector(`.role-fields[data-fields="${currentRole}"]`);
+  let inp = form.querySelector(`[name="${key}"][data-shared]`) || active.querySelector(`[name="${key}"]`);
+  if(!inp) return key;
+  const lbl = inp.closest(".field")?.querySelector("label");
+  if(!lbl) return key;
+  return lbl.childNodes[0].nodeValue.trim();
+}
+
+el("reviewBtn").parentElement.parentElement.parentElement.addEventListener("submit",()=>{});
+form.addEventListener("submit",(e)=>{
+  e.preventDefault();
+  const data = collect();
+  const missing = ROLE_META[currentRole].required.filter(k=>!data[k]);
+  if(missing.length){
+    setReadout("readout","err",`Missing: ${missing.map(labelFor).join(", ")}`);
+    const first = form.querySelector(`[name="${missing[0]}"]`); if(first) first.focus();
+    return;
+  }
+  if(!el("consent").checked){
+    setReadout("readout","err","Please tick the consent box to continue.");
+    el("consent").focus();
+    return;
+  }
+  pendingData = data;
+  buildReview(data);
+  gotoStep(2);
+});
+
+function buildReview(data){
+  const rows = el("reviewRows"); rows.innerHTML = "";
+  const skip = new Set(["type","submittedAt"]);
+  Object.keys(data).forEach(k=>{
+    if(skip.has(k) || !data[k]) return;
+    const row = document.createElement("div"); row.className="rev-row";
+    row.innerHTML = `<div class="k">${labelFor(k)}</div><div class="v"></div>`;
+    row.querySelector(".v").textContent = data[k];
+    rows.appendChild(row);
+  });
+}
+
+el("backBtn").addEventListener("click", ()=>gotoStep(1));
+
+function setReadout(node, state, text){
+  const r = el(node); r.className = "readout " + state;
+  el(node==="readout"?"readoutText":"readoutText2").textContent = text;
+}
+function refNum(){
+  const d = new Date();
+  const p = n=>String(n).padStart(2,"0");
+  const rand = Math.floor(Math.random()*9000+1000);
+  return `DC-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${rand}`;
+}
+
+el("submitBtn").addEventListener("click", async ()=>{
+  const url = ENDPOINTS[currentRole];
+  if(!url){ setReadout("readout2","err","No endpoint set for this role."); return; }
+  const btn = el("submitBtn"); btn.disabled=true; btn.classList.add("loading");
+  setReadout("readout2","busy","Sending…");
+  const ref = refNum();
+  pendingData.reference = ref;
+  try{
+    const res = await fetch(url,{ method:"POST",
+      headers:{ "Content-Type":"application/json", "X-Onboarding-Secret": SHARED_SECRET },
+      body: JSON.stringify(pendingData) });
+    if(!res.ok) throw new Error(`Workflow returned ${res.status}`);
+    showConfirm(ref);
+  }catch(err){
+    setReadout("readout2","err",`Couldn't send — ${err.message}. Your details are safe; please try again.`);
+  }finally{ btn.disabled=false; btn.classList.remove("loading"); }
+});
+
+function showConfirm(ref){
+  el("refNumber").textContent = ref;
+  const m = ROLE_META[currentRole];
+  el("confirmTitle").textContent = `${m.tag} engagement started`;
+  const steps = {
+    client: ["An internal owner has been assigned to your engagement.","A project space is being set up.","Expect a first response within 1–2 business days."],
+    intern: ["Your placement record has been created.","Your mentor will be notified.","Download your documents below and read them before day one."],
+    contractor: ["Your engagement record has been created.","Contract and deliverables are being reviewed.","Expect next steps from your point of contact shortly."]
+  }[currentRole];
+  el("confirmMsg").textContent = "Your submission has been received and routed to the right owner at Digital Chances.";
+  el("nextSteps").innerHTML = steps.map(s=>`<li>${s}</li>`).join("");
+  el("internDownloads").classList.toggle("show", currentRole==="intern");
+  gotoStep(3);
+}
+
+el("anotherBtn").addEventListener("click", ()=>{ form.reset(); el("consent").checked=false; setRole(currentRole); });
+
+function downloadText(fn,t){ const b=new Blob([t],{type:"text/markdown;charset=utf-8"}); const u=URL.createObjectURL(b);
+  const a=document.createElement("a"); a.href=u; a.download=fn; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),1000); }
+el("dlHandbook").addEventListener("click", ()=>downloadText("Digital-Chances-Intern-Handbook.md", INTERN_HANDBOOK));
+el("dlPolicy").addEventListener("click", ()=>downloadText("Digital-Chances-Policies-and-Expectations.md", INTERN_POLICY));
+
+setRole("client");
+</script>
+</body>
+</html>
